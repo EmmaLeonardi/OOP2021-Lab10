@@ -31,42 +31,49 @@ public final class MusicGroupImpl implements MusicGroup {
 
     @Override
     public Stream<String> orderedSongNames() {
-        return null;
+        return songs.stream().map(s -> s.getSongName()).sorted();
     }
 
     @Override
     public Stream<String> albumNames() {
-        return null;
+        return albums.keySet().stream();
     }
 
     @Override
     public Stream<String> albumInYear(final int year) {
-        return null;
+        return albums.keySet().stream().filter(t -> (albums.get(t).equals(year)));
     }
 
     @Override
     public int countSongs(final String albumName) {
-        return -1;
+        return Math.toIntExact(songs.stream().filter(t -> (t.getAlbumName().orElse("").equals(albumName))).count());
     }
 
     @Override
     public int countSongsInNoAlbum() {
-        return -1;
+        return countSongs("");
     }
 
     @Override
     public OptionalDouble averageDurationOfSongs(final String albumName) {
-        return null;
+        return songs.stream().filter(s -> s.getAlbumName().orElse("").equals(albumName))
+                .mapToDouble(t -> t.getDuration()).average();
     }
 
     @Override
     public Optional<String> longestSong() {
-        return null;
+        return Optional.of(
+                songs.stream().max((a, b) -> (Double.compare(a.getDuration(), b.getDuration()))).get().getSongName());
     }
 
     @Override
     public Optional<String> longestAlbum() {
-        return null;
+        return albums.keySet().stream()
+                .max((a, b) -> Double.compare(
+                        songs.stream().filter(s -> s.getAlbumName().orElse("").equals(a))
+                                .mapToDouble(t -> t.getDuration()).sum(),
+                        songs.stream().filter(s -> s.getAlbumName().orElse("").equals(b))
+                                .mapToDouble(t -> t.getDuration()).sum()));
     }
 
     private static final class Song {
